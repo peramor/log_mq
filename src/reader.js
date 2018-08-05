@@ -1,4 +1,3 @@
-console.time('reading');
 const
   util = require('util'),
   fs = require('fs'),
@@ -6,12 +5,13 @@ const
   rl = require('readline'),
   LOG_PATH = process.env.LOG_PATH || join(__dirname, '..', 'input.csv'),
   stat = util.promisify(fs.fstat),
-  dec = new (require('string_decoder').StringDecoder)('utf-8');
+  dec = new (require('string_decoder').StringDecoder)('utf-8'),
+  mapper = require('./mapper')
 let
   cursor = 0,
   fileSize = 0,
   buf = Buffer.allocUnsafe(64), // length of a line is from 50 to 2xx, so 64 is optimal 
-  fd; // File descriptor.
+  fd // File descriptor.
 
 // We use Sync, because we want to identify log file
 // before start.
@@ -27,17 +27,26 @@ try {
 }
 
 function processLine(line) {
-  // console.log(line);
+  mapper.map(line);
+  // -> mq
+}
+
+function close() {
+  fs.close(fd, err => {
+    if (err) throw err;
+    console.info('file successfully closed')
+  })
 }
 
 // ------------------------ HISTORICAL DATA --------------------------
-
 let histProcessed = false; // set true when all historical data will be processed.
 
 let stream = fs.createReadStream(LOG_PATH);
 const histReadline = rl.createInterface({
   input: stream
 });
+
+console.time('reading');
 
 histReadline.on('line', line => {
   processLine(line);
@@ -49,13 +58,6 @@ histReadline.on('close', () => {
   stream.close();
   histProcessed = true;
 })
-
-function close() {
-  fs.close(fd, err => {
-    if (err) throw err;
-    console.info('file successfully closed')
-  })
-}
 
 // ------------------------ DINAMIC UPDATES --------------------------
 
@@ -74,13 +76,11 @@ fs.watch(LOG_PATH, { encoding: 'utf8' }, async (event) => {
   }
 })
 
-function extract(processLineCB) {
+function extract() {
   do {
     var { line, end } = readline();
     processLine(line);
   } while (!end)
-  // map
-  // -> mq
 }
 
 function readline() {
