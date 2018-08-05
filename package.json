@@ -1,0 +1,26 @@
+{
+  "name": "log_mq",
+  "version": "0.1.0",
+  "description": "Read logs, build charts",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "pg": "^7.4.3",
+    "ws": "^6.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified, Sorry :(\" && exit 1"
+  },
+  "keywords": [
+    "postgres",
+    "api",
+    "web-socket",
+    "mq",
+    "memcashe"
+  ],
+  "author": "Roman Maltsev <rnaltsev@ya.ru>",
+  "license": "ISC"
+}
