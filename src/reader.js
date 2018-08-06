@@ -8,7 +8,7 @@ const
   dec = new (require('string_decoder').StringDecoder)('utf-8'),
   mapper = require('./mapper')
 let
-  cursor = 0,
+  cursor = 0, // TODO: take the value from a store
   fileSize = 0,
   buf = Buffer.allocUnsafe(64), // length of a line is from 50 to 2xx, so 64 is optimal 
   fd // File descriptor.

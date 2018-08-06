@@ -11,6 +11,7 @@
     "jsonschema": "^1.2.4",
     "pg": "^7.4.3",
     "promise": "^8.0.1",
+    "randomstring": "^1.1.5",
     "ws": "^6.0.0"
   },
   "devDependencies": {},

@@ -32,6 +32,12 @@ pool.connect()
       .then(() => client.release())
   });
 
+/**
+ * Creates a row in User_Behaviors table.
+ * @param {object} obj log object
+ * 
+ * TODO: the function could be optimized by using transactions
+ */
 let create = async obj => {
   try {
     validate(obj)
@@ -50,16 +56,4 @@ let create = async obj => {
   } catch (err) {
     console.error('Error while creating new row', err)
   }
-}
-
-/**
- * Creates a row in User_Behaviors table.
- * @param {object} obj log object
- * 
- * TODO: the function could be optimized by using transactions
- */
-exports.create = create;
-
-exports.read = () => {
-
 }
