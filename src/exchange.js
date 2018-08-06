@@ -1,56 +1,55 @@
 const rabbit = require('amqplib');
 let ex = 'logs'
 
-class Rabbit {
-  constructor() {
-    rabbit.connect('amqp://localhost')
-      .then(conn => {
-        this.conn = conn;
-        return this.conn.createChannel()
-      })
-      .then(ch => {
-        this.ch = ch
-        return this.ch.assertExchange(ex, 'fanout', { durable: false })
-      })
-      .catch(err => console.error(err))
-  }
-
-  dispose() {
-    this.conn.close()
+/**
+ * Connect to AMQP
+ * @returns {Promise} resolves {conn, ch} obj
+ */
+let connect = async () => {
+  try {
+    let conn = await rabbit.connect('amqp://localhost');
+    console.log('rabbit connected')
+    let ch = await conn.createChannel();
+    ch.assertExchange(ex, 'fanout', { durable: false });
+    return { conn, ch }
+  } catch (err) {
+    console.error(err)
   }
 }
 
-class Consumer extends Rabbit {
-  /**
-   * Consumes messages.
-   * @param {callback} processMessage takes exact one arg - msg
-   */
-  constructor(processMessage) {
-    super()
-    this.ch.assertQueue('', { exclusive: true })
-      .then(q => {
-        this.q = q
-        this.ch.bindQueue(q.queue, ex, '')
-        // for the PoC we do not require acknowledgement
-        this.ch.consume(this.q.queue, processMessage, { noAck: true })
-      })
-  }
+/**
+ * Closes a connection.
+ * @param {Object} conn - connection object from 'connect'
+ */
+let dispose = (conn) => {
+  conn.close();
 }
 
-class Producer extends Rabbit {
-  constructor() {
-    super()
-  }
+/**
+ * Set a handler for incoming messages.
+ * @param {object} ch channel obj from 'connect'
+ * @param {callback} processMessage takes exact one arg
+ */
+let setProcessMessageCB = async (ch, processMessage) => {
+  let q = await ch.assertQueue('', { exclusive: true })
+  ch.bindQueue(q.queue, ex, '')
+  ch.consume(q.queue, processMessage, { noAck: true })
+}
 
-  produce(msg) {
-    this.ch.publish(ex, '', new Buffer(msg))
-  }
+/**
+ * Produces a message
+ * @param {object} ch channle obj from 'connect
+ * @param {string} msg message
+ */
+let produceMessage = async (ch, msg) => {
+  ch.publish(ex, '', new Buffer(msg))
 }
 
 module.exports = {
-  Rabbit,
-  Consumer,
-  Producer
+  connect,
+  dispose,
+  setProcessMessageCB,
+  produceMessage
 }
 
 

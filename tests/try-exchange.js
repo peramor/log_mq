@@ -1,25 +1,27 @@
-let { Consumer, Producer } = require('../src/exchange');
+let exchange = require('../src/exchange');
+let fs = require('fs');
+(async function test() {
+  let producer = await exchange.connect()
+  let consumer1 = await exchange.connect()
+  let consumer2 = await exchange.connect()
 
-let consumer1 = new Consumer(msg => {
-  console.log('thread 1: ' + msg)
-})
+  await exchange.setProcessMessageCB(consumer1.ch, msg => {
+    console.log('thread 1: ' + msg.content.toString());
+  })
 
-let consumer2 = new Consumer(msg => {
-  console.log('thread 2: ' + msg)
-})
+  await exchange.setProcessMessageCB(consumer2.ch, msg => {
+    console.log('thread 2: ' + msg.content.toString());
+  })
 
-let producer = new Producer();
+  let count = 10; // we wanna send 10 messages
 
-let count = 10; // we wanna send 10 messages
+  (async function sendMessage() {
+    if (count <= 0)
+      return
 
-(function hi() {
-  if (count <= 0) {
-    producer.dispose()
-    consumer1.dispose()
-    consumer2.dispose()
-    return
-  }
-  producer.produce(`${count} messages left`)
-  count--
-  hi()
+    exchange.produceMessage(producer.ch, `${count} messages left`)
+    count--
+    sendMessage()
+  })()
+
 })()
