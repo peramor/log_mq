@@ -14,6 +14,7 @@ let connect = async () => {
     return { conn, ch }
   } catch (err) {
     console.error(err)
+    process.exit(-1)
   }
 }
 

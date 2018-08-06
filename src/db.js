@@ -1,11 +1,25 @@
 const
   { Pool } = require('pg'),
   { validate } = require('./schema-validator'),
+  exchange = require('./exchange'),
   pool = new Pool(),
   fs = require('fs'),
   { join } = require('path'),
   initSql = fs.readFileSync(
-    join(__dirname, 'schema', 'init.sql'), 'utf8')
+    join(__dirname, 'schema', 'init.sql'), 'utf8');
+let
+  consumer = {},
+  mqConnected = false;
+
+exchange.connect()
+  .then(res => {
+    mqConnected = true;
+    console.log('db consumer connected')
+    consumer = res;
+    exchange.setProcessMessageCB(consumer.ch, msg => {
+      create(JSON.parse(msg.content.toString()))
+    })
+  })
 
 pool.on('error', (err, client) => {
   console.error('Unexpected error on idle client', err)
@@ -15,16 +29,10 @@ pool.on('error', (err, client) => {
 pool.connect()
   .then(client => {
     client.query(initSql)
-      .then(res => client.release())
+      .then(() => client.release())
   });
 
-/**
- * Creates a row in User_Behaviors table.
- * @param {object} obj log object
- * 
- * TODO: the function could be optimized by using transactions
- */
-exports.create = async obj => {
+let create = async obj => {
   try {
     validate(obj)
     obj.ymdh = new Date(...obj.ymdh.split('-'))
@@ -43,6 +51,14 @@ exports.create = async obj => {
     console.error('Error while creating new row', err)
   }
 }
+
+/**
+ * Creates a row in User_Behaviors table.
+ * @param {object} obj log object
+ * 
+ * TODO: the function could be optimized by using transactions
+ */
+exports.create = create;
 
 exports.read = () => {
 
