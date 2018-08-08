@@ -1,0 +1,8 @@
+###
+GET http://localhost:8081/stat/top_forms
+
+###
+GET http://localhost:8081/stat/not_completed
+
+###
+GET http://localhost:8081/stat/user_forms

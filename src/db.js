@@ -41,6 +41,9 @@ pool.connect()
 let create = async obj => {
   try {
     validate(obj)
+    if (obj.subtype.length > 20)
+      console.log(JSON.stringify(obj))
+    return;
     obj.ymdh = new Date(...obj.ymdh.split('-'))
     let text = `insert into user_behaviors (
       code, formid, grp, ltpa, orgid, ssoid, subtype, 
@@ -56,4 +59,30 @@ let create = async obj => {
   } catch (err) {
     console.error('Error while creating new row', err)
   }
+}
+
+exports.notCompleted = (limit = 10, offset = 0) => {
+  if (+limit !== limit) limit = 10;
+  if (+offset !== offset) offset = 0;
+  
+  return pool.query(`select formid, json_agg((ssoid, type, subtype)) from user_behaviors
+  where subtype != 'success'
+  group by formid
+  limit $1
+  offset $2`, [limit, offset])
+}
+
+exports.topForms = () => {
+  return pool.query(`select formid, count(formid) as freq from user_behaviors 
+  where formid ~ '.+'
+  group by formid 
+  order by freq 
+  desc limit 5;`)
+}
+
+exports.userForms = () => {
+  return pool.query(`select ssoid, array_agg(formid) 
+  from user_behaviors 
+  where extract(epoch from now())-ts < 3600 
+  group by ssoid;`)
 }
