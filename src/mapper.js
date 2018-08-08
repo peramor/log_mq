@@ -1,5 +1,4 @@
 const
-  db = require('./db'),
   exchange = require('./exchange');
 let
   isHeaderLine = true,
@@ -44,7 +43,3 @@ module.exports.map = async row => {
     console.error(err)
   }
 }
-
-setTimeout(() => {
-
-}, 15000);

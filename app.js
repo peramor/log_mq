@@ -5,5 +5,6 @@ setTimeout(() => {
 }, 500);
 
 setTimeout(() => {
-  require('./src/reader') // start reading
+  require('./src/reader') // run reader worker
+    .on('loaded', () => require('./src/http-server')) // run server
 }, 2000);

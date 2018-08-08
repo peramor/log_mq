@@ -6,12 +6,14 @@ const
   LOG_PATH = process.env.LOG_PATH || join(__dirname, '..', 'input.csv'),
   stat = util.promisify(fs.fstat),
   dec = new (require('string_decoder').StringDecoder)('utf-8'),
-  mapper = require('./mapper')
+  mapper = require('./mapper'),
+  EventEmitter = require('events').EventEmitter;
 let
   cursor = 0, // TODO: take the value from a store
   fileSize = 0,
   buf = Buffer.allocUnsafe(64), // length of a line is from 50 to 2xx, so 64 is optimal 
-  fd // File descriptor.
+  fd, // File descriptor.
+  moduleLoader = new EventEmitter(); // emit 'loaded'
 
 // We use Sync, because we want to identify log file
 // before start.
@@ -56,7 +58,7 @@ histReadline.on('close', () => {
   console.timeEnd('reading');
   console.info('Historical data was successfully executed');
   stream.close();
-  histProcessed = true;
+  moduleLoader.emit('loaded', {from: 'module'})
 })
 
 // ------------------------ DINAMIC UPDATES --------------------------
@@ -102,3 +104,5 @@ function readline() {
     }
   }
 }
+
+module.exports = moduleLoader
