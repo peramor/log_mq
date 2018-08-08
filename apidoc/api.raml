@@ -1,0 +1,29 @@
+#%RAML 0.8
+title: Log MQ
+version: v0.0.1
+baseUri: /stat
+
+/user_forms:
+  get:
+    description: fetches users and most used forms during last hour
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: !include examples/user-forms.json
+/top_forms:
+  get:
+    description: fetches top 5 most used forms
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: !include examples/top-forms.json
+/not_completed:
+  get:
+    description: fetches user list and their last activity status if not fineshed
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: !include examples/not-completed.json

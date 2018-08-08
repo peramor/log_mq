@@ -1,0 +1,16 @@
+[
+  {
+    "ssoid": "user-1",
+    "forms": [
+      "form-1",
+      "form-2"
+    ]
+  },
+  {
+    "ssoid": "user-2",
+    "forms": [
+      "form-1",
+      "form-3"
+    ]
+  }
+]
